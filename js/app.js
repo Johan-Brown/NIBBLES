@@ -31,10 +31,10 @@ async function loadJson(file) {
 function renderCategory() {
   const category = state.category || {};
   const title = category.displayName || category.name || category.title || 'NIBBLES';
-  document.title = `${title} — Empathy Books`;
+  document.title = `${title} — Narrative Intervention Books`;
   $('#categoryTitle').textContent = title;
-  $('#categoryDescription').textContent = category.description || 'Where Stories Become Intervention.';
-  $('#categoryBadge').textContent = category.badge || 'EMPATHY BOOKS';
+  $('#categoryDescription').textContent = category.description || 'Narrative Intervention Books for Behavioural, Learning, Emotional & Social Development.';
+  $('#categoryBadge').textContent = category.badge || 'NIBBLES';
 }
 
 function renderBooks() {

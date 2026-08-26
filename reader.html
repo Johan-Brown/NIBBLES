@@ -7,245 +7,424 @@
   <title>Reading — NIBBLES</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    body { min-height: 100vh; background:#eef5f2; }
-    .reader-header { position:sticky; top:0; z-index:20; background:#0b4f43; color:#fff; box-shadow:0 8px 25px rgba(0,0,0,.12); }
-    .reader-nav { min-height:72px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
-    .back-link { color:#fff; text-decoration:none; font-weight:800; }
-    .reader-title { margin:0; font-size:18px; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .reader-shell { width:min(1100px, calc(100% - 24px)); margin:18px auto 24px; }
-    #viewer { min-height:calc(100vh - 175px); background:#fff; border-radius:18px; box-shadow:0 15px 45px rgba(16,65,53,.12); overflow:hidden; position:relative; }
-    #epubViewport { width:100%; height:calc(100vh - 175px); min-height:560px; }
-    .reader-message { display:grid; place-items:center; min-height:50vh; padding:30px; color:#65736f; text-align:center; }
-    .cover-screen { min-height:calc(100vh - 175px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; background:#fff; text-align:center; }
-    .cover-screen img { max-width:min(78vw, 620px); max-height:calc(100vh - 300px); object-fit:contain; border-radius:10px; box-shadow:0 18px 45px rgba(0,0,0,.18); }
-    .cover-screen .cover-fallback { width:min(78vw,420px); aspect-ratio:3/4; display:grid; place-items:center; border-radius:18px; background:linear-gradient(145deg,#e8f6ef,#c9e9d8); font-size:80px; box-shadow:0 18px 45px rgba(0,0,0,.14); }
-    .cover-actions { display:flex; gap:12px; margin-top:22px; }
-    .reader-btn { border:0; border-radius:12px; padding:12px 20px; background:#0b4f43; color:#fff; font:inherit; font-weight:800; cursor:pointer; }
-    .reader-btn.secondary { background:#e8f6ef; color:#0b4f43; }
-    .reader-controls { display:flex; justify-content:center; gap:10px; padding:12px; background:#fff; border-top:1px solid #dce9e4; position:sticky; bottom:0; z-index:10; }
-    .reader-controls button { min-width:110px; }
-    .reader-progress { text-align:center; color:#65736f; font-size:13px; padding:5px 10px 0; background:#fff; }
-    @media(max-width:600px) {
-      .reader-title { max-width:55%; font-size:15px; }
-      #epubViewport { min-height:500px; height:calc(100vh - 175px); }
-      .cover-screen img { max-height:calc(100vh - 300px); }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
+    body { min-height: 100vh; background: #eef5f2; font-family: Inter, Arial, sans-serif; }
+
+    .reader-header {
+      position: sticky; top: 0; z-index: 1000;
+      background: #0b4f43; color: white;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+    .reader-nav {
+      min-height: 64px; display: flex; align-items: center; justify-content: space-between;
+      gap: 20px; padding: 0 18px;
+    }
+    .back-link { color: white; text-decoration: none; font-weight: 700; white-space: nowrap; }
+    .back-link:hover { text-decoration: underline; }
+    .reader-title {
+      margin: 0; font-size: 18px; font-weight: 700; text-align: right;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .reader-shell {
+      width: min(1100px, calc(100% - 24px));
+      margin: 16px auto 30px auto;
+    }
+    #viewer {
+      position: relative; width: 100%; min-height: calc(100vh - 160px);
+      background: white; border-radius: 18px;
+      box-shadow: 0 15px 45px rgba(16, 65, 53, 0.12);
+      overflow: hidden;
+    }
+    #viewer iframe {
+      display: block; width: 100% !important; border: 0 !important; background: white;
+    }
+
+    .nibbles-cover-page {
+      position: relative; width: 100%; height: calc(100vh - 160px); min-height: 500px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: white; padding: 25px; text-align: center;
+    }
+    .nibbles-cover-image {
+      display: block; width: auto; height: auto; max-width: 92%; max-height: calc(100% - 90px);
+      object-fit: contain; margin: auto; border-radius: 8px; box-shadow: 0 14px 40px rgba(0,0,0,0.15);
+    }
+    .nibbles-cover-fallback {
+      width: 220px; height: 300px; display: grid; place-items: center; font-size: 72px;
+      background: linear-gradient(145deg, #e8f6ef, #c9e9d8); border-radius: 16px; margin: auto;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+    .nibbles-cover-next {
+      position: absolute; right: 25px; bottom: 20px; border: none; border-radius: 25px;
+      padding: 12px 26px; background: #0b4f43; color: white; font-size: 16px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 5px 18px rgba(0, 0, 0, 0.15); transition: transform 0.15s ease;
+    }
+    .nibbles-cover-next:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .page-tap-zone {
+      position: absolute; top: 0; bottom: 0; width: 15%; border: 0; margin: 0; padding: 0;
+      background: transparent; cursor: pointer; z-index: 10;
+    }
+    .page-tap-zone-left { left: 0; }
+    .page-tap-zone-right { right: 0; }
+
+    .reader-controls {
+      display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 14px;
+    }
+    .reader-nav-btn {
+      min-width: 100px; padding: 10px 22px; border: 0; border-radius: 10px;
+      background: #0b4f43; color: white; font-size: 15px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 6px 16px rgba(11, 79, 67, 0.25); transition: background 0.15s ease;
+    }
+    .reader-nav-btn:hover { background: #0e6353; }
+    .reader-nav-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
+    .reader-page-indicator { min-width: 90px; text-align: center; color: #4d5a56; font-size: 14px; }
+
+    .reader-message {
+      min-height: 50vh; display: grid; place-items: center; padding: 30px;
+      color: #65736f; text-align: center; line-height: 1.6;
+    }
+    .reader-error {
+      max-width: 700px; margin: auto; padding: 30px; color: #8b2635;
+      background: #fff1f3; border-radius: 14px; text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .reader-nav { min-height: 58px; padding: 0 12px; }
+      .back-link { font-size: 14px; }
+      .reader-title { max-width: 55%; font-size: 15px; }
+      .reader-shell { width: calc(100% - 10px); margin-top: 8px; }
+      #viewer { border-radius: 12px; }
+      .nibbles-cover-page { height: calc(100vh - 140px); min-height: 400px; padding: 15px; }
+      .nibbles-cover-next { right: 15px; bottom: 15px; padding: 10px 21px; font-size: 14px; }
     }
   </style>
 </head>
 <body>
-<header class="reader-header">
-  <div class="container reader-nav">
-    <a class="back-link" href="./">← Back to NIBBLES</a>
-    <h1 id="readerTitle" class="reader-title">Loading book…</h1>
-  </div>
-</header>
+  <header class="reader-header">
+    <div class="container reader-nav">
+      <a class="back-link" href="./">← Back to NIBBLES</a>
+      <h1 id="readerTitle" class="reader-title">Loading book…</h1>
+    </div>
+  </header>
 
-<main class="reader-shell">
-  <div id="viewer">
-    <div class="reader-message">Preparing the reader…</div>
-  </div>
-  <div id="progress" class="reader-progress" hidden></div>
-  <div id="controls" class="reader-controls" hidden>
-    <button id="prevBtn" class="reader-btn secondary" type="button">← Previous</button>
-    <button id="nextBtn" class="reader-btn" type="button">Next →</button>
-  </div>
-</main>
+  <main class="reader-shell">
+    <div id="viewer">
+      <div class="reader-message">Preparing the reader…</div>
+    </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
-<script>
-const params = new URLSearchParams(location.search);
-const requestedBook = params.get('book');
-const viewer = document.getElementById('viewer');
-const readerTitle = document.getElementById('readerTitle');
-const controls = document.getElementById('controls');
-const progress = document.getElementById('progress');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
+    <div id="controls" class="reader-controls">
+      <button id="prevBtn" class="reader-nav-btn" type="button">← Prev</button>
+      <span id="pageIndicator" class="reader-page-indicator"></span>
+      <button id="nextBtn" class="reader-nav-btn" type="button">Next →</button>
+    </div>
+  </main>
 
-let bookInstance = null;
-let rendition = null;
-let locationsReady = false;
-let atCover = true;
-let storyStarted = false;
-let spineItems = [];
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+  <script>
+    "use strict";
 
-function message(text) {
-  viewer.innerHTML = '<div class="reader-message">' + text + '</div>';
-  controls.hidden = true;
-  progress.hidden = true;
-}
+    const params = new URLSearchParams(window.location.search);
+    const requestedBook = params.get("book");
 
-function safeText(value) {
-  return String(value ?? '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-  }[c]));
-}
+    const viewer = document.getElementById("viewer");
+    const readerTitle = document.getElementById("readerTitle");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const pageIndicator = document.getElementById("pageIndicator");
 
-async function loadBooks() {
-  const response = await fetch('./books.json', {cache:'no-cache'});
-  if (!response.ok) throw new Error('books.json could not be loaded (' + response.status + ')');
-  const data = await response.json();
-  return Array.isArray(data) ? data : (data.books || []);
-}
+    let book = null;
+    let rendition = null;
+    let currentSection = 0;
+    let totalSections = 0;
+    let showingCover = false;
+    let firstStorySection = null;
 
-function absoluteBookUrl(file) {
-  return new URL(file, window.location.href).href;
-}
+    function message(text) {
+      viewer.innerHTML = `<div class="reader-message">${text}</div>`;
+    }
 
-async function getCoverData(epub) {
-  try {
-    const url = await epub.coverUrl();
-    if (url) return url;
-  } catch (_) {}
-  return null;
-}
+    function showError(error) {
+      console.error("NIBBLES EPUB READER ERROR:", error);
+      message(`
+        <div class="reader-error">
+          <strong>Unable to open this book.</strong><br><br>
+          ${escapeHtml(error && error.message ? error.message : String(error))}
+          <br><br>
+          <small>Open the browser console for more details.</small>
+        </div>
+      `);
+    }
 
-function showCover(coverUrl) {
-  atCover = true;
-  storyStarted = false;
-  controls.hidden = false;
-  prevBtn.disabled = true;
-  nextBtn.disabled = false;
-  progress.hidden = true;
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
 
-  const title = safeText(readerTitle.textContent || 'NIBBLES Book');
-  viewer.innerHTML = `
-    <section class="cover-screen" aria-label="Book cover">
-      ${coverUrl
-        ? `<img src="${coverUrl}" alt="${title} cover">`
-        : `<div class="cover-fallback" aria-hidden="true">📖</div>`}
-      <div class="cover-actions">
-        <button id="startBtn" class="reader-btn" type="button">Start Story →</button>
-      </div>
-    </section>`;
-  document.getElementById('startBtn').addEventListener('click', startStory);
-}
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
-async function findStorySection(epub) {
-  // Prefer a real story/document section and avoid titlepage/cover-only entries.
-  const candidates = [];
-  const spine = epub.spine && epub.spine.items ? epub.spine.items : [];
-  for (const item of spine) {
-    const href = String(item.href || '').toLowerCase();
-    if (/cover|titlepage|title-page|toc|nav/.test(href)) continue;
-    candidates.push(item);
-  }
-  return candidates[0] || spine[0] || null;
-}
+    async function sectionLooksEmpty(section) {
+      try {
+        if (!section) return true;
+        await section.load(book.load.bind(book));
+        const doc = section.document;
+        if (!doc || !doc.body) return true;
 
-async function startStory() {
-  if (!rendition || !bookInstance) return;
-  atCover = false;
-  storyStarted = true;
-  viewer.innerHTML = '<div id="epubViewport"></div>';
-  controls.hidden = false;
-  progress.hidden = false;
-  rendition.attachTo('epubViewport');
+        const clone = doc.body.cloneNode(true);
+        clone.querySelectorAll("script,style,noscript").forEach(el => el.remove());
+        const text = (clone.textContent || "").replace(/\s+/g, "").trim();
+        if (text.length > 20) {
+          section.unload();
+          return false;
+        }
 
-  const firstStory = await findStorySection(bookInstance);
-  if (firstStory) {
-    await rendition.display(firstStory.href);
-  } else {
-    await rendition.display();
-  }
-  updateControls();
-}
+        const images = doc.body.querySelectorAll("img, svg");
+        if (images.length > 0) {
+          section.unload();
+          return false;
+        }
 
-async function initReader() {
-  if (!requestedBook) {
-    message('No book was selected.');
-    return;
-  }
+        section.unload();
+        return true;
+      } catch (error) {
+        console.warn("Could not inspect section:", error);
+        return false;
+      }
+    }
 
-  try {
-    const books = await loadBooks();
-    const book = books.find(item => item.file === requestedBook);
-    if (!book) throw new Error('Book not found in books.json: ' + requestedBook);
+    async function findFirstContentSection() {
+      try {
+        const spineItems = book.spine.spineItems || [];
+        totalSections = spineItems.length;
 
-    readerTitle.textContent = book.title || 'NIBBLES Book';
+        for (let i = 0; i < spineItems.length; i++) {
+          const section = spineItems[i];
+          const href = String(section.href || '').toLowerCase();
+          if (/cover|titlepage|title-page|toc|nav/.test(href)) continue;
+          const empty = await sectionLooksEmpty(section);
+          if (!empty) return section;
+        }
+      } catch (error) {
+        console.warn("Unable to inspect spine:", error);
+      }
+      return book.spine.get(0);
+    }
 
-    const bookUrl = absoluteBookUrl(book.file);
-    const response = await fetch(bookUrl);
-    if (!response.ok) throw new Error('EPUB could not be downloaded (' + response.status + ')');
+    async function showBookCover() {
+      try {
+        const coverUrl = await book.coverUrl();
+        viewer.innerHTML = `
+          <div class="nibbles-cover-page">
+            ${coverUrl
+              ? `<img src="${escapeHtml(coverUrl)}" alt="Book cover" class="nibbles-cover-image">`
+              : `<div class="nibbles-cover-fallback" aria-hidden="true">📖</div>`}
+            <button type="button" class="nibbles-cover-next" id="coverNextBtn">Start Story →</button>
+          </div>
+        `;
+        document.getElementById("coverNextBtn").addEventListener("click", openStoryFromCover);
+        showingCover = true;
+        updateControls();
+        window.scrollTo({ top: 0, behavior: "auto" });
+        return true;
+      } catch (error) {
+        console.warn("Could not load cover:", error);
+        return false;
+      }
+    }
 
-    const epubData = await response.arrayBuffer();
-    if (!epubData.byteLength) throw new Error('The EPUB file is empty.');
+    async function openStoryFromCover() {
+      showingCover = false;
+      viewer.innerHTML = `
+        <button id="prevZone" class="page-tap-zone page-tap-zone-left" aria-label="Previous page" type="button"></button>
+        <button id="nextZone" class="page-tap-zone page-tap-zone-right" aria-label="Next page" type="button"></button>
+      `;
+      setupTapZones();
 
-    bookInstance = ePub(epubData);
+      if (firstStorySection && rendition) {
+        await rendition.display(firstStorySection.href);
+      } else if (rendition) {
+        await rendition.display();
+      }
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
 
-    rendition = bookInstance.renderTo('viewer', {
-      width:'100%',
-      height:'calc(100vh - 175px)',
-      spread:'auto',
-      flow:'paginated',
-      allowScriptedContent:true
+    function setupTapZones() {
+      const pZone = document.getElementById("prevZone");
+      const nZone = document.getElementById("nextZone");
+      if (pZone) pZone.addEventListener("click", previousPage);
+      if (nZone) nZone.addEventListener("click", nextPage);
+    }
+
+    function injectReaderStyles(contents) {
+      try {
+        const doc = contents.document;
+        if (!doc) return;
+        if (doc.getElementById("nibbles-reader-overrides")) return;
+
+        const style = doc.createElement("style");
+        style.id = "nibbles-reader-overrides";
+        style.textContent = `
+          html { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+          body { margin: 0 !important; width: 100% !important; box-sizing: border-box !important; overflow-x: hidden !important; }
+          img, video, svg, canvas { max-width: 100% !important; box-sizing: border-box !important; }
+          * { box-sizing: border-box; }
+        `;
+        doc.head.appendChild(style);
+      } catch (error) {
+        console.warn("Could not inject reader CSS:", error);
+      }
+    }
+
+    function updateLocation(location) {
+      if (!location || !location.start) return;
+      currentSection = location.start.index;
+      updateControls();
+    }
+
+    function updateControls() {
+      if (showingCover) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = false;
+        pageIndicator.textContent = "Cover";
+        return;
+      }
+      prevBtn.disabled = (currentSection <= 0);
+      nextBtn.disabled = false;
+      if (totalSections) {
+        pageIndicator.textContent = `${currentSection + 1} / ${totalSections}`;
+      }
+    }
+
+    async function nextPage() {
+      if (showingCover) {
+        await openStoryFromCover();
+        return;
+      }
+      if (!rendition) return;
+      try {
+        await rendition.next();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (error) {
+        console.log("Reached end of EPUB.");
+      }
+    }
+
+    async function previousPage() {
+      if (showingCover) return;
+      if (currentSection === 0 && firstStorySection && firstStorySection.index === 0) {
+        await showBookCover();
+        return;
+      }
+      if (!rendition) return;
+      try {
+        await rendition.prev();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (error) {
+        console.log("Reached beginning of EPUB.");
+      }
+    }
+
+    document.addEventListener("keydown", function(event) {
+      const target = event.target;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (event.key === "ArrowRight" || event.key === "PageDown") { event.preventDefault(); nextPage(); }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") { event.preventDefault(); previousPage(); }
     });
 
-    rendition.on('relocated', updateControls);
+    if (prevBtn) prevBtn.addEventListener("click", previousPage);
+    if (nextBtn) nextBtn.addEventListener("click", nextPage);
 
-    await bookInstance.ready;
+    let resizeTimer = null;
+    window.addEventListener("resize", function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        if (rendition) rendition.resize(viewer.clientWidth, viewer.clientHeight);
+      }, 200);
+    });
 
-    const coverUrl = await getCoverData(bookInstance);
-    showCover(coverUrl);
-  } catch (error) {
-    console.error('NIBBLES EPUB READER ERROR:', error);
-    message(`
-      <div>
-        <strong>Unable to open this book.</strong><br><br>
-        ${safeText(error.message)}
-        <br><br>
-        <small>Check the browser console for more details.</small>
-      </div>`);
-  }
-}
+    async function initReader() {
+      try {
+        if (!requestedBook) {
+          message("No book was selected.");
+          return;
+        }
 
-async function nextPage() {
-  if (atCover) {
-    await startStory();
-    return;
-  }
-  if (rendition) await rendition.next();
-  updateControls();
-}
+        const response = await fetch("./books.json", { cache: "no-cache" });
+        if (!response.ok) throw new Error(`books.json could not be loaded (${response.status})`);
+        const data = await response.json();
+        const books = Array.isArray(data) ? data : (data.books || []);
 
-async function previousPage() {
-  if (atCover) return;
-  if (rendition) await rendition.prev();
-  updateControls();
-}
+        const selectedBook = books.find(item => item.file === requestedBook);
+        if (!selectedBook) throw new Error(`Book not found in books.json: ${requestedBook}`);
 
-function updateControls() {
-  if (atCover) {
-    prevBtn.disabled = true;
-    nextBtn.disabled = false;
-    progress.textContent = '';
-    return;
-  }
-  prevBtn.disabled = false;
-  nextBtn.disabled = false;
-  try {
-    const loc = rendition.currentLocation();
-    const displayed = loc && loc.start && loc.start.displayed;
-    if (displayed && displayed.page && displayed.total) {
-      progress.textContent = 'Page ' + displayed.page + ' of ' + displayed.total;
-    } else {
-      progress.textContent = 'NIBBLES';
+        readerTitle.textContent = selectedBook.title || "NIBBLES Book";
+        message(`<div>Opening <strong>${escapeHtml(selectedBook.title || "book")}</strong>…</div>`);
+
+        const bookUrl = new URL(selectedBook.file, window.location.href).href;
+        const epubResponse = await fetch(bookUrl, { cache: "no-cache" });
+        if (!epubResponse.ok) throw new Error(`EPUB could not be downloaded (${epubResponse.status})`);
+
+        const epubData = await epubResponse.arrayBuffer();
+        if (!epubData || !epubData.byteLength) throw new Error("The EPUB file is empty.");
+
+        book = ePub(epubData);
+        await book.ready;
+
+        totalSections = (book.spine.spineItems || []).length;
+        firstStorySection = await findFirstContentSection();
+
+        try {
+          const metadata = book.package && book.package.metadata;
+          if (metadata && metadata.title) readerTitle.textContent = metadata.title;
+        } catch (_) {}
+
+        viewer.innerHTML = "";
+
+        rendition = book.renderTo("viewer", {
+          width: "100%",
+          height: "calc(100vh - 160px)",
+          flow: "paginated",
+          manager: "default",
+          spread: "none",
+          allowScriptedContent: true,
+          allowPopups: true
+        });
+
+        rendition.hooks.content.register(function(contents) {
+          injectReaderStyles(contents);
+        });
+
+        rendition.on("displayed", function() {
+          setTimeout(function() {
+            window.scrollTo({ top: 0, behavior: "auto" });
+          }, 20);
+        });
+
+        rendition.on("relocated", function(location) {
+          updateLocation(location);
+        });
+
+        const coverShown = await showBookCover();
+        if (!coverShown) {
+          await openStoryFromCover();
+        }
+
+        await wait(100);
+        if (rendition) rendition.resize(viewer.clientWidth, viewer.clientHeight);
+      } catch (error) {
+        showError(error);
+      }
     }
-  } catch (_) {
-    progress.textContent = 'NIBBLES';
-  }
-}
 
-prevBtn.addEventListener('click', previousPage);
-nextBtn.addEventListener('click', nextPage);
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight') nextPage();
-  if (e.key === 'ArrowLeft') previousPage();
-});
-
-initReader();
-</script>
+    initReader();
+  </script>
 </body>
 </html>
