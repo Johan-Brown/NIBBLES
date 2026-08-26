@@ -1,1786 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <meta
-    name="theme-color"
-    content="#0b4f43"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b4f43">
   <title>Reading — NIBBLES</title>
-
-  <link
-    rel="stylesheet"
-    href="css/style.css"
-  >
-
+  <link rel="stylesheet" href="css/style.css">
   <style>
-
-    * {
-      box-sizing: border-box;
+    body { min-height: 100vh; background:#eef5f2; }
+    .reader-header { position:sticky; top:0; z-index:20; background:#0b4f43; color:#fff; box-shadow:0 8px 25px rgba(0,0,0,.12); }
+    .reader-nav { min-height:72px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .back-link { color:#fff; text-decoration:none; font-weight:800; }
+    .reader-title { margin:0; font-size:18px; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .reader-shell { width:min(1100px, calc(100% - 24px)); margin:18px auto 24px; }
+    #viewer { min-height:calc(100vh - 175px); background:#fff; border-radius:18px; box-shadow:0 15px 45px rgba(16,65,53,.12); overflow:hidden; position:relative; }
+    #epubViewport { width:100%; height:calc(100vh - 175px); min-height:560px; }
+    .reader-message { display:grid; place-items:center; min-height:50vh; padding:30px; color:#65736f; text-align:center; }
+    .cover-screen { min-height:calc(100vh - 175px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; background:#fff; text-align:center; }
+    .cover-screen img { max-width:min(78vw, 620px); max-height:calc(100vh - 300px); object-fit:contain; border-radius:10px; box-shadow:0 18px 45px rgba(0,0,0,.18); }
+    .cover-screen .cover-fallback { width:min(78vw,420px); aspect-ratio:3/4; display:grid; place-items:center; border-radius:18px; background:linear-gradient(145deg,#e8f6ef,#c9e9d8); font-size:80px; box-shadow:0 18px 45px rgba(0,0,0,.14); }
+    .cover-actions { display:flex; gap:12px; margin-top:22px; }
+    .reader-btn { border:0; border-radius:12px; padding:12px 20px; background:#0b4f43; color:#fff; font:inherit; font-weight:800; cursor:pointer; }
+    .reader-btn.secondary { background:#e8f6ef; color:#0b4f43; }
+    .reader-controls { display:flex; justify-content:center; gap:10px; padding:12px; background:#fff; border-top:1px solid #dce9e4; position:sticky; bottom:0; z-index:10; }
+    .reader-controls button { min-width:110px; }
+    .reader-progress { text-align:center; color:#65736f; font-size:13px; padding:5px 10px 0; background:#fff; }
+    @media(max-width:600px) {
+      .reader-title { max-width:55%; font-size:15px; }
+      #epubViewport { min-height:500px; height:calc(100vh - 175px); }
+      .cover-screen img { max-height:calc(100vh - 300px); }
     }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-    }
-
-    body {
-      min-height: 100vh;
-      background: #eef5f2;
-      font-family: Arial, sans-serif;
-    }
-
-    /* =========================================================
-       HEADER
-       ========================================================= */
-
-    .reader-header {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-
-      background: #0b4f43;
-      color: white;
-
-      box-shadow:
-        0 8px 25px rgba(0, 0, 0, 0.12);
-    }
-
-    .reader-nav {
-      min-height: 64px;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      gap: 20px;
-      padding: 0 18px;
-    }
-
-    .back-link {
-      color: white;
-      text-decoration: none;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .reader-title {
-      margin: 0;
-
-      font-size: 18px;
-      font-weight: 700;
-
-      text-align: right;
-
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    /* =========================================================
-       READER AREA
-       ========================================================= */
-
-    .reader-shell {
-      width: min(1100px, calc(100% - 24px));
-
-      margin:
-        16px auto
-        30px auto;
-    }
-
-    #viewer {
-      position: relative;
-
-      width: 100%;
-
-      min-height:
-        calc(100vh - 150px);
-
-      background: white;
-
-      border-radius: 18px;
-
-      box-shadow:
-        0 15px 45px rgba(16, 65, 53, 0.12);
-
-      overflow: hidden;
-    }
-
-    /* EPUB.js iframe */
-
-    #viewer iframe {
-      display: block;
-
-      width: 100% !important;
-
-      border: 0 !important;
-
-      background: white;
-    }
-
-    /* =========================================================
-       COVER PAGE
-       ========================================================= */
-
-    .mogge-cover-page {
-      position: relative;
-
-      width: 100%;
-      height: calc(100vh - 150px);
-
-      min-height: 500px;
-
-      display: flex;
-
-      align-items: center;
-      justify-content: center;
-
-      background: white;
-
-      padding: 25px;
-    }
-
-    .mogge-cover-image {
-      display: block;
-
-      width: auto;
-      height: auto;
-
-      max-width: 92%;
-      max-height: calc(100% - 90px);
-
-      object-fit: contain;
-
-      margin: auto;
-
-      border-radius: 4px;
-    }
-
-    .mogge-cover-next {
-      position: absolute;
-
-      right: 25px;
-      bottom: 20px;
-
-      border: none;
-      border-radius: 25px;
-
-      padding: 12px 26px;
-
-      background: #0b4f43;
-      color: white;
-
-      font-size: 16px;
-      font-weight: 700;
-
-      cursor: pointer;
-
-      box-shadow:
-        0 5px 18px rgba(0, 0, 0, 0.15);
-    }
-
-    .mogge-cover-next:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    .mogge-cover-next:active {
-      transform: translateY(0);
-    }
-
-    .mogge-cover-fallback {
-      width: 100%;
-      height: 100%;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      text-align: center;
-
-      padding: 30px;
-    }
-
-    /* =========================================================
-       LOADING / ERROR
-       ========================================================= */
-
-    .reader-message {
-      min-height: 50vh;
-
-      display: grid;
-      place-items: center;
-
-      padding: 30px;
-
-      color: #65736f;
-
-      text-align: center;
-
-      line-height: 1.6;
-    }
-
-    .reader-error {
-      max-width: 700px;
-
-      margin: auto;
-
-      padding: 30px;
-
-      color: #8b2635;
-
-      background: #fff1f3;
-
-      border-radius: 14px;
-    }
-
-    /* =========================================================
-       MOBILE
-       ========================================================= */
-
-    @media (max-width: 600px) {
-
-      .reader-nav {
-        min-height: 58px;
-        padding: 0 12px;
-      }
-
-      .back-link {
-        font-size: 14px;
-      }
-
-      .reader-title {
-        max-width: 55%;
-        font-size: 15px;
-      }
-
-      .reader-shell {
-        width: calc(100% - 10px);
-        margin-top: 8px;
-      }
-
-      #viewer {
-        border-radius: 12px;
-      }
-
-      .mogge-cover-page {
-        height: calc(100vh - 135px);
-        min-height: 400px;
-
-        padding: 15px;
-      }
-
-      .mogge-cover-image {
-        max-width: 95%;
-        max-height: calc(100% - 75px);
-      }
-
-      .mogge-cover-next {
-        right: 15px;
-        bottom: 15px;
-
-        padding: 10px 21px;
-
-        font-size: 14px;
-      }
-
-    }
-
   </style>
-
 </head>
-
-
 <body>
+<header class="reader-header">
+  <div class="container reader-nav">
+    <a class="back-link" href="./">← Back to NIBBLES</a>
+    <h1 id="readerTitle" class="reader-title">Loading book…</h1>
+  </div>
+</header>
 
-  <!-- =========================================================
-       HEADER
-       ========================================================= -->
+<main class="reader-shell">
+  <div id="viewer">
+    <div class="reader-message">Preparing the reader…</div>
+  </div>
+  <div id="progress" class="reader-progress" hidden></div>
+  <div id="controls" class="reader-controls" hidden>
+    <button id="prevBtn" class="reader-btn secondary" type="button">← Previous</button>
+    <button id="nextBtn" class="reader-btn" type="button">Next →</button>
+  </div>
+</main>
 
-  <header class="reader-header">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const requestedBook = params.get('book');
+const viewer = document.getElementById('viewer');
+const readerTitle = document.getElementById('readerTitle');
+const controls = document.getElementById('controls');
+const progress = document.getElementById('progress');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
 
-    <div class="container reader-nav">
+let bookInstance = null;
+let rendition = null;
+let locationsReady = false;
+let atCover = true;
+let storyStarted = false;
+let spineItems = [];
 
-      <a
-        class="back-link"
-        href="./"
-      >
-        ← Back to NIBBLES
-      </a>
+function message(text) {
+  viewer.innerHTML = '<div class="reader-message">' + text + '</div>';
+  controls.hidden = true;
+  progress.hidden = true;
+}
 
-      <h1
-        id="readerTitle"
-        class="reader-title"
-      >
-        Loading book…
-      </h1>
+function safeText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[c]));
+}
 
-    </div>
+async function loadBooks() {
+  const response = await fetch('./books.json', {cache:'no-cache'});
+  if (!response.ok) throw new Error('books.json could not be loaded (' + response.status + ')');
+  const data = await response.json();
+  return Array.isArray(data) ? data : (data.books || []);
+}
 
-  </header>
+function absoluteBookUrl(file) {
+  return new URL(file, window.location.href).href;
+}
 
+async function getCoverData(epub) {
+  try {
+    const url = await epub.coverUrl();
+    if (url) return url;
+  } catch (_) {}
+  return null;
+}
 
-  <!-- =========================================================
-       EPUB VIEWER
-       ========================================================= -->
+function showCover(coverUrl) {
+  atCover = true;
+  storyStarted = false;
+  controls.hidden = false;
+  prevBtn.disabled = true;
+  nextBtn.disabled = false;
+  progress.hidden = true;
 
-  <main class="reader-shell">
-
-    <div id="viewer">
-
-      <div class="reader-message">
-        Preparing the reader…
+  const title = safeText(readerTitle.textContent || 'NIBBLES Book');
+  viewer.innerHTML = `
+    <section class="cover-screen" aria-label="Book cover">
+      ${coverUrl
+        ? `<img src="${coverUrl}" alt="${title} cover">`
+        : `<div class="cover-fallback" aria-hidden="true">📖</div>`}
+      <div class="cover-actions">
+        <button id="startBtn" class="reader-btn" type="button">Start Story →</button>
       </div>
+    </section>`;
+  document.getElementById('startBtn').addEventListener('click', startStory);
+}
 
-    </div>
+async function findStorySection(epub) {
+  // Prefer a real story/document section and avoid titlepage/cover-only entries.
+  const candidates = [];
+  const spine = epub.spine && epub.spine.items ? epub.spine.items : [];
+  for (const item of spine) {
+    const href = String(item.href || '').toLowerCase();
+    if (/cover|titlepage|title-page|toc|nav/.test(href)) continue;
+    candidates.push(item);
+  }
+  return candidates[0] || spine[0] || null;
+}
 
-  </main>
+async function startStory() {
+  if (!rendition || !bookInstance) return;
+  atCover = false;
+  storyStarted = true;
+  viewer.innerHTML = '<div id="epubViewport"></div>';
+  controls.hidden = false;
+  progress.hidden = false;
+  rendition.attachTo('epubViewport');
 
+  const firstStory = await findStorySection(bookInstance);
+  if (firstStory) {
+    await rendition.display(firstStory.href);
+  } else {
+    await rendition.display();
+  }
+  updateControls();
+}
 
-  <!-- =========================================================
-       LIBRARIES
-       ========================================================= -->
+async function initReader() {
+  if (!requestedBook) {
+    message('No book was selected.');
+    return;
+  }
 
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js">
-  </script>
+  try {
+    const books = await loadBooks();
+    const book = books.find(item => item.file === requestedBook);
+    if (!book) throw new Error('Book not found in books.json: ' + requestedBook);
 
-  <script
-    src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js">
-  </script>
+    readerTitle.textContent = book.title || 'NIBBLES Book';
 
+    const bookUrl = absoluteBookUrl(book.file);
+    const response = await fetch(bookUrl);
+    if (!response.ok) throw new Error('EPUB could not be downloaded (' + response.status + ')');
 
-  <!-- =========================================================
-       READER
-       ========================================================= -->
+    const epubData = await response.arrayBuffer();
+    if (!epubData.byteLength) throw new Error('The EPUB file is empty.');
 
-  <script>
+    bookInstance = ePub(epubData);
 
-    "use strict";
+    rendition = bookInstance.renderTo('viewer', {
+      width:'100%',
+      height:'calc(100vh - 175px)',
+      spread:'auto',
+      flow:'paginated',
+      allowScriptedContent:true
+    });
 
+    rendition.on('relocated', updateControls);
 
-    /* =========================================================
-       URL PARAMETERS
-       ========================================================= */
+    await bookInstance.ready;
 
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+    const coverUrl = await getCoverData(bookInstance);
+    showCover(coverUrl);
+  } catch (error) {
+    console.error('NIBBLES EPUB READER ERROR:', error);
+    message(`
+      <div>
+        <strong>Unable to open this book.</strong><br><br>
+        ${safeText(error.message)}
+        <br><br>
+        <small>Check the browser console for more details.</small>
+      </div>`);
+  }
+}
 
-    const requestedBook =
-      params.get("book");
+async function nextPage() {
+  if (atCover) {
+    await startStory();
+    return;
+  }
+  if (rendition) await rendition.next();
+  updateControls();
+}
 
+async function previousPage() {
+  if (atCover) return;
+  if (rendition) await rendition.prev();
+  updateControls();
+}
 
-    /* =========================================================
-       DOM
-       ========================================================= */
-
-    const viewer =
-      document.getElementById("viewer");
-
-    const readerTitle =
-      document.getElementById("readerTitle");
-
-
-    /* =========================================================
-       GLOBAL VARIABLES
-       ========================================================= */
-
-    let book = null;
-
-    let rendition = null;
-
-    let currentSection = 0;
-
-    let totalSections = 0;
-
-    let firstStorySection = null;
-
-    let showingCover = false;
-
-    let coverUrl = null;
-
-
-    /* =========================================================
-       MESSAGE
-       ========================================================= */
-
-    function message(text) {
-
-      viewer.innerHTML = `
-        <div class="reader-message">
-          ${text}
-        </div>
-      `;
-
+function updateControls() {
+  if (atCover) {
+    prevBtn.disabled = true;
+    nextBtn.disabled = false;
+    progress.textContent = '';
+    return;
+  }
+  prevBtn.disabled = false;
+  nextBtn.disabled = false;
+  try {
+    const loc = rendition.currentLocation();
+    const displayed = loc && loc.start && loc.start.displayed;
+    if (displayed && displayed.page && displayed.total) {
+      progress.textContent = 'Page ' + displayed.page + ' of ' + displayed.total;
+    } else {
+      progress.textContent = 'NIBBLES';
     }
-
-
-    /* =========================================================
-       ERROR
-       ========================================================= */
-
-    function showError(error) {
-
-      console.error(
-        "EPUB READER ERROR:",
-        error
-      );
-
-      message(`
-
-        <div class="reader-error">
-
-          <strong>
-            Unable to open this book.
-          </strong>
-
-          <br><br>
-
-          ${escapeHtml(
-            error && error.message
-              ? error.message
-              : String(error)
-          )}
-
-          <br><br>
-
-          <small>
-            Open the browser console
-            for more details.
-          </small>
-
-        </div>
-
-      `);
-
-    }
-
-
-    /* =========================================================
-       HTML ESCAPE
-       ========================================================= */
-
-    function escapeHtml(value) {
-
-      return String(value)
-
-        .replaceAll(
-          "&",
-          "&amp;"
-        )
-
-        .replaceAll(
-          "<",
-          "&lt;"
-        )
-
-        .replaceAll(
-          ">",
-          "&gt;"
-        )
-
-        .replaceAll(
-          '"',
-          "&quot;"
-        )
-
-        .replaceAll(
-          "'",
-          "&#039;"
-        );
-
-    }
-
-
-    /* =========================================================
-       WAIT
-       ========================================================= */
-
-    function wait(ms) {
-
-      return new Promise(
-        resolve =>
-          setTimeout(
-            resolve,
-            ms
-          )
-      );
-
-    }
-
-
-    /* =========================================================
-       CHECK IF SECTION IS EMPTY
-       ========================================================= */
-
-    async function sectionLooksEmpty(section) {
-
-      try {
-
-        if (!section) {
-          return true;
-        }
-
-        await section.load(
-          book.load.bind(book)
-        );
-
-        const document =
-          section.document;
-
-        if (!document) {
-          return true;
-        }
-
-        const body =
-          document.body;
-
-        if (!body) {
-          return true;
-        }
-
-        /*
-         * Remove scripts and styles
-         * before checking text.
-         */
-
-        const clone =
-          body.cloneNode(true);
-
-        clone
-          .querySelectorAll(
-            "script,style,noscript"
-          )
-          .forEach(
-            el => el.remove()
-          );
-
-        const text =
-          (clone.textContent || "")
-            .replace(/\s+/g, "")
-            .trim();
-
-
-        /*
-         * Meaningful text means
-         * this is a real content section.
-         */
-
-        if (text.length > 20) {
-
-          section.unload();
-
-          return false;
-
-        }
-
-
-        /*
-         * Image-only pages can still
-         * be real story pages.
-         */
-
-        const images =
-          body.querySelectorAll("img");
-
-        if (images.length > 0) {
-
-          section.unload();
-
-          return false;
-
-        }
-
-
-        /*
-         * SVG can also represent
-         * an image-only page.
-         */
-
-        const svg =
-          body.querySelectorAll("svg");
-
-        if (svg.length > 0) {
-
-          section.unload();
-
-          return false;
-
-        }
-
-
-        section.unload();
-
-        return true;
-
-      } catch (error) {
-
-        console.warn(
-          "Could not inspect section:",
-          error
-        );
-
-        /*
-         * If inspection fails,
-         * don't accidentally skip it.
-         */
-
-        return false;
-
-      }
-
-    }
-
-
-    /* =========================================================
-       FIND FIRST REAL STORY SECTION
-       ========================================================= */
-
-    async function findFirstContentSection() {
-
-      try {
-
-        const spineItems =
-          book.spine.spineItems || [];
-
-        totalSections =
-          spineItems.length;
-
-        console.log(
-          "EPUB spine sections:",
-          totalSections
-        );
-
-
-        for (
-          let i = 0;
-          i < spineItems.length;
-          i++
-        ) {
-
-          const section =
-            spineItems[i];
-
-          console.log(
-            "Checking EPUB section:",
-            i,
-            section.href
-          );
-
-
-          const empty =
-            await sectionLooksEmpty(
-              section
-            );
-
-
-          if (!empty) {
-
-            console.log(
-              "First meaningful section:",
-              i,
-              section.href
-            );
-
-            return section;
-
-          }
-
-        }
-
-      } catch (error) {
-
-        console.warn(
-          "Unable to inspect spine:",
-          error
-        );
-
-      }
-
-
-      /*
-       * Fallback to first spine item.
-       */
-
-      return book.spine.get(0);
-
-    }
-
-
-    /* =========================================================
-       SHOW EPUB COVER
-       ========================================================= */
-
-    async function showBookCover() {
-
-      try {
-
-        console.log(
-          "Trying to load EPUB cover..."
-        );
-
-
-        /*
-         * EPUB.js gets the cover image
-         * from EPUB metadata.
-         */
-
-        coverUrl =
-          await book.coverUrl();
-
-
-        if (!coverUrl) {
-
-          console.log(
-            "No EPUB cover image found."
-          );
-
-          return false;
-
-        }
-
-
-        console.log(
-          "EPUB cover found:",
-          coverUrl
-        );
-
-
-        viewer.innerHTML = `
-
-          <div class="mogge-cover-page">
-
-            <img
-              src="${escapeHtml(coverUrl)}"
-              alt="Book cover"
-              class="mogge-cover-image"
-            >
-
-            <button
-              type="button"
-              class="mogge-cover-next"
-              onclick="openStoryFromCover()"
-            >
-              Next →
-            </button>
-
-          </div>
-
-        `;
-
-
-        showingCover = true;
-
-
-        /*
-         * Reset reader scroll position.
-         */
-
-        window.scrollTo({
-          top: 0,
-          behavior: "auto"
-        });
-
-
-        return true;
-
-      } catch (error) {
-
-        console.warn(
-          "Could not load EPUB cover:",
-          error
-        );
-
-        return false;
-
-      }
-
-    }
-
-
-    /* =========================================================
-       OPEN STORY AFTER COVER
-       ========================================================= */
-
-    async function openStoryFromCover() {
-
-      if (!firstStorySection) {
-
-        console.error(
-          "First story section is not available."
-        );
-
-        return;
-
-      }
-
-
-      if (!rendition) {
-
-        console.error(
-          "EPUB rendition is not ready."
-        );
-
-        return;
-
-      }
-
-
-      showingCover = false;
-
-
-      try {
-
-        /*
-         * Restore EPUB viewer.
-         */
-
-        viewer.innerHTML = "";
-
-
-        /*
-         * Open the actual first story section.
-         */
-
-        await rendition.display(
-          firstStorySection.href
-        );
-
-
-        window.scrollTo({
-          top: 0,
-          behavior: "auto"
-        });
-
-
-        console.log(
-          "Story opened after cover."
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Could not open story:",
-          error
-        );
-
-        showError(error);
-
-      }
-
-    }
-
-
-    /* =========================================================
-       INJECT EPUB CSS
-       ========================================================= */
-
-    function injectReaderStyles(contents) {
-
-      try {
-
-        const document =
-          contents.document;
-
-        if (!document) {
-          return;
-        }
-
-
-        /*
-         * Prevent duplicate style injection.
-         */
-
-        const existing =
-          document.getElementById(
-            "mogge-reader-overrides"
-          );
-
-        if (existing) {
-          return;
-        }
-
-
-        const style =
-          document.createElement(
-            "style"
-          );
-
-        style.id =
-          "mogge-reader-overrides";
-
-
-        style.textContent = `
-
-          html {
-
-            margin: 0 !important;
-            padding: 0 !important;
-
-            width: 100% !important;
-
-          }
-
-          body {
-
-            margin: 0 !important;
-
-            width: 100% !important;
-
-            box-sizing:
-              border-box !important;
-
-            overflow-x:
-              hidden !important;
-
-          }
-
-          img,
-          video,
-          svg,
-          canvas {
-
-            max-width:
-              100% !important;
-
-            box-sizing:
-              border-box !important;
-
-          }
-
-          * {
-
-            box-sizing:
-              border-box;
-
-          }
-
-        `;
-
-
-        document.head.appendChild(
-          style
-        );
-
-
-        console.log(
-          "Reader CSS injected."
-        );
-
-      } catch (error) {
-
-        console.warn(
-          "Could not inject reader CSS:",
-          error
-        );
-
-      }
-
-    }
-
-
-    /* =========================================================
-       ENABLE EPUB JAVASCRIPT
-       ========================================================= */
-
-    function enableBookScripts(contents) {
-
-      try {
-
-        const document =
-          contents.document;
-
-        if (!document) {
-          return;
-        }
-
-
-        console.log(
-          "Interactive EPUB section loaded."
-        );
-
-
-        /*
-         * EPUB JavaScript is enabled by:
-         *
-         * allowScriptedContent: true
-         *
-         * in the rendition options.
-         *
-         * We intentionally don't execute
-         * script text manually here.
-         */
-
-      } catch (error) {
-
-        console.warn(
-          "Script initialization warning:",
-          error
-        );
-
-      }
-
-    }
-
-
-    /* =========================================================
-       UPDATE LOCATION
-       ========================================================= */
-
-    function updateLocation(location) {
-
-      if (!location) {
-        return;
-      }
-
-
-      try {
-
-        const start =
-          location.start;
-
-        if (!start) {
-          return;
-        }
-
-
-        currentSection =
-          start.index;
-
-
-        console.log(
-          "EPUB location:",
-          location
-        );
-
-      } catch (error) {
-
-        console.warn(
-          "Location update failed:",
-          error
-        );
-
-      }
-
-    }
-
-
-    /* =========================================================
-       NEXT PAGE
-       ========================================================= */
-
-    async function nextPage() {
-
-      /*
-       * COVER → FIRST STORY PAGE
-       */
-
-      if (showingCover) {
-
-        await openStoryFromCover();
-
-        return;
-
-      }
-
-
-      if (!rendition) {
-        return;
-      }
-
-
-      try {
-
-        await rendition.next();
-
-
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-
-
-        console.log(
-          "Moved to next page."
-        );
-
-      } catch (error) {
-
-        console.log(
-          "Reached end of EPUB."
-        );
-
-      }
-
-    }
-
-
-    /* =========================================================
-       PREVIOUS PAGE
-       ========================================================= */
-
-    async function previousPage() {
-
-      if (!rendition) {
-        return;
-      }
-
-
-      /*
-       * If we are on the first story page,
-       * Previous should return to the cover.
-       */
-
-      if (!showingCover) {
-
-        try {
-
-          const location =
-            rendition.currentLocation();
-
-
-          if (
-            location &&
-            location.start &&
-            firstStorySection &&
-            location.start.index ===
-              firstStorySection.index
-          ) {
-
-            await showBookCover();
-
-            return;
-
-          }
-
-        } catch (error) {
-
-          console.warn(
-            "Could not determine current location:",
-            error
-          );
-
-        }
-
-      }
-
-
-      /*
-       * Normal EPUB previous-page behavior.
-       */
-
-      try {
-
-        await rendition.prev();
-
-
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-
-
-        console.log(
-          "Moved to previous page."
-        );
-
-      } catch (error) {
-
-        console.log(
-          "Reached beginning of EPUB."
-        );
-
-      }
-
-    }
-
-
-    /* =========================================================
-       KEYBOARD NAVIGATION
-       ========================================================= */
-
-    document.addEventListener(
-      "keydown",
-      function(event) {
-
-        const target =
-          event.target;
-
-
-        /*
-         * Don't interfere with
-         * input controls.
-         */
-
-        if (
-          target &&
-          (
-            target.tagName === "INPUT" ||
-            target.tagName === "TEXTAREA" ||
-            target.isContentEditable
-          )
-        ) {
-
-          return;
-
-        }
-
-
-        /*
-         * NEXT
-         */
-
-        if (
-          event.key === "ArrowRight" ||
-          event.key === "PageDown"
-        ) {
-
-          event.preventDefault();
-
-          nextPage();
-
-        }
-
-
-        /*
-         * PREVIOUS
-         */
-
-        if (
-          event.key === "ArrowLeft" ||
-          event.key === "PageUp"
-        ) {
-
-          event.preventDefault();
-
-          previousPage();
-
-        }
-
-      }
-    );
-
-
-    /* =========================================================
-       RESIZE
-       ========================================================= */
-
-    let resizeTimer = null;
-
-
-    window.addEventListener(
-      "resize",
-      function() {
-
-        clearTimeout(
-          resizeTimer
-        );
-
-
-        resizeTimer =
-          setTimeout(
-            function() {
-
-              if (rendition) {
-
-                rendition.resize(
-                  viewer.clientWidth,
-                  viewer.clientHeight
-                );
-
-              }
-
-            },
-            200
-          );
-
-      }
-    );
-
-
-    /* =========================================================
-       INITIALIZE READER
-       ========================================================= */
-
-    async function initReader() {
-
-      try {
-
-        /* =====================================================
-           CHECK BOOK PARAMETER
-           ===================================================== */
-
-        if (!requestedBook) {
-
-          message(
-            "No book was selected."
-          );
-
-          return;
-
-        }
-
-
-        console.log(
-          "Requested book:",
-          requestedBook
-        );
-
-
-        /* =====================================================
-           LOAD BOOKS.JSON
-           ===================================================== */
-
-        console.log(
-          "Loading books.json..."
-        );
-
-
-        const response =
-          await fetch(
-            "./books.json",
-            {
-              cache: "no-cache"
-            }
-          );
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            `books.json could not be loaded (${response.status})`
-          );
-
-        }
-
-
-        const data =
-          await response.json();
-
-
-        const books =
-          Array.isArray(data)
-            ? data
-            : (data.books || []);
-
-
-        console.log(
-          "Books loaded:",
-          books.length
-        );
-
-
-        /* =====================================================
-           FIND SELECTED BOOK
-           ===================================================== */
-
-        const selectedBook =
-          books.find(
-            item =>
-              item.file ===
-              requestedBook
-          );
-
-
-        if (!selectedBook) {
-
-          throw new Error(
-            `Book not found in books.json: ${requestedBook}`
-          );
-
-        }
-
-
-        /* =====================================================
-           TITLE
-           ===================================================== */
-
-        readerTitle.textContent =
-          selectedBook.title ||
-          "NIBBLES Book";
-
-
-        message(`
-
-          <div>
-
-            Opening
-
-            <strong>
-              ${escapeHtml(
-                selectedBook.title ||
-                "book"
-              )}
-            </strong>
-
-            …
-
-          </div>
-
-        `);
-
-
-        /* =====================================================
-           EPUB URL
-           ===================================================== */
-
-        const bookUrl =
-          new URL(
-            selectedBook.file,
-            window.location.href
-          ).href;
-
-
-        console.log(
-          "Opening EPUB:",
-          bookUrl
-        );
-
-
-        /* =====================================================
-           DOWNLOAD EPUB
-           ===================================================== */
-
-        const epubResponse =
-          await fetch(
-            bookUrl,
-            {
-              cache: "no-cache"
-            }
-          );
-
-
-        if (!epubResponse.ok) {
-
-          throw new Error(
-            `EPUB could not be downloaded (${epubResponse.status})`
-          );
-
-        }
-
-
-        const epubData =
-          await epubResponse.arrayBuffer();
-
-
-        console.log(
-          "EPUB downloaded:",
-          epubData.byteLength,
-          "bytes"
-        );
-
-
-        if (
-          !epubData ||
-          !epubData.byteLength
-        ) {
-
-          throw new Error(
-            "The EPUB file is empty."
-          );
-
-        }
-
-
-        /* =====================================================
-           CREATE EPUB
-           ===================================================== */
-
-        book =
-          ePub(epubData);
-
-
-        /* =====================================================
-           WAIT FOR EPUB
-           ===================================================== */
-
-        await book.ready;
-
-
-        console.log(
-          "EPUB book is ready."
-        );
-
-
-        /* =====================================================
-           METADATA
-           ===================================================== */
-
-        try {
-
-          const metadata =
-            book.package &&
-            book.package.metadata;
-
-
-          if (
-            metadata &&
-            metadata.title
-          ) {
-
-            readerTitle.textContent =
-              metadata.title;
-
-          }
-
-        } catch (error) {
-
-          console.warn(
-            "Metadata could not be read:",
-            error
-          );
-
-        }
-
-
-        /* =====================================================
-           FIND FIRST STORY SECTION
-           ===================================================== */
-
-        firstStorySection =
-          await findFirstContentSection();
-
-
-        if (!firstStorySection) {
-
-          throw new Error(
-            "No readable content section was found in this EPUB."
-          );
-
-        }
-
-
-        console.log(
-          "First story section:",
-          firstStorySection.href
-        );
-
-
-        /* =====================================================
-           CLEAR LOADING MESSAGE
-           ===================================================== */
-
-        viewer.innerHTML = "";
-
-
-        /* =====================================================
-           CREATE RENDITION
-           ===================================================== */
-
-        rendition =
-          book.renderTo(
-            "viewer",
-            {
-
-              width: "100%",
-
-              height:
-                "calc(100vh - 150px)",
-
-              /*
-               * IMPORTANT:
-               *
-               * paginated means a long story
-               * automatically becomes multiple pages.
-               */
-
-              flow: "paginated",
-
-              manager: "default",
-
-              spread: "none",
-
-              /*
-               * IMPORTANT:
-               *
-               * This allows trusted interactive
-               * EPUB JavaScript to work.
-               */
-
-              allowScriptedContent: true,
-
-              /*
-               * Allow EPUB popups where required.
-               */
-
-              allowPopups: true
-
-            }
-          );
-
-
-        /* =====================================================
-           CONTENT HOOK
-           ===================================================== */
-
-        rendition.hooks.content.register(
-          function(contents) {
-
-            injectReaderStyles(
-              contents
-            );
-
-            enableBookScripts(
-              contents
-            );
-
-          }
-        );
-
-
-        /* =====================================================
-           DISPLAY EVENT
-           ===================================================== */
-
-        rendition.on(
-          "displayed",
-          function(section) {
-
-            console.log(
-              "EPUB section rendered:",
-              section
-            );
-
-
-            setTimeout(
-              function() {
-
-                window.scrollTo({
-                  top: 0,
-                  behavior: "auto"
-                });
-
-              },
-              20
-            );
-
-          }
-        );
-
-
-        /* =====================================================
-           LOCATION EVENT
-           ===================================================== */
-
-        rendition.on(
-          "relocated",
-          function(location) {
-
-            updateLocation(
-              location
-            );
-
-          }
-        );
-
-
-        /* =====================================================
-           LINK EVENT
-           ===================================================== */
-
-        rendition.on(
-          "linkClicked",
-          function(href) {
-
-            console.log(
-              "EPUB link clicked:",
-              href
-            );
-
-          }
-        );
-
-
-        /* =====================================================
-           SHOW COVER FIRST
-           ===================================================== */
-
-        const coverShown =
-          await showBookCover();
-
-
-        /*
-         * If EPUB metadata doesn't contain
-         * a cover, immediately show the story.
-         */
-
-        if (!coverShown) {
-
-          showingCover = false;
-
-
-          await rendition.display(
-            firstStorySection.href
-          );
-
-
-          console.log(
-            "No EPUB cover available."
-          );
-
-        } else {
-
-          console.log(
-            "Cover displayed first."
-          );
-
-        }
-
-
-        /* =====================================================
-           FINAL RESIZE
-           ===================================================== */
-
-        await wait(100);
-
-
-        if (rendition) {
-
-          rendition.resize(
-            viewer.clientWidth,
-            viewer.clientHeight
-          );
-
-        }
-
-
-        console.log(
-          "EPUB reader ready."
-        );
-
-      } catch (error) {
-
-        showError(
-          error
-        );
-
-      }
-
-    }
-
-
-    /* =========================================================
-       START
-       ========================================================= */
-
-    initReader();
-
-  </script>
-
+  } catch (_) {
+    progress.textContent = 'NIBBLES';
+  }
+}
+
+prevBtn.addEventListener('click', previousPage);
+nextBtn.addEventListener('click', nextPage);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') nextPage();
+  if (e.key === 'ArrowLeft') previousPage();
+});
+
+initReader();
+</script>
 </body>
-
 </html>

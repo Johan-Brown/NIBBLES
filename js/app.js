@@ -30,10 +30,10 @@ async function loadJson(file) {
 
 function renderCategory() {
   const category = state.category || {};
-  const title = category.displayName || category.name || category.title || 'Mogge';
+  const title = category.displayName || category.name || category.title || 'NIBBLES';
   document.title = `${title} — Empathy Books`;
   $('#categoryTitle').textContent = title;
-  $('#categoryDescription').textContent = category.description || 'Mission Of Generating Global Empathy.';
+  $('#categoryDescription').textContent = category.description || 'Where Stories Become Intervention.';
   $('#categoryBadge').textContent = category.badge || 'EMPATHY BOOKS';
 }
 
