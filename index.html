@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mogge — Mission Of Generating Global Empathy. Explore interactive empathy storybooks for children.">
+  <meta name="theme-color" content="#0b4f43">
+  <title>Mogge — Empathy Books</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav container" aria-label="Main navigation">
+      <a class="brand" href="./" aria-label="Mogge home">
+        <span class="brand-mark">M</span>
+        <span>Mogge</span>
+      </a>
+      <a class="hub-link" href="../">JohanBrown Books</a>
+    </nav>
+
+    <div class="hero-content container">
+      <div class="hero-copy">
+        <span class="eyebrow" id="categoryBadge">EMPATHY BOOKS</span>
+        <h1 id="categoryTitle">Mogge</h1>
+        <p id="categoryDescription">Mission Of Generating Global Empathy.</p>
+        <p class="hero-note">Stories that help children understand kindness, sharing, friendship and the feelings of others.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="heart heart-one">♥</div>
+        <div class="heart heart-two">♥</div>
+        <div class="hero-circle">💚</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="library-section container" aria-labelledby="libraryHeading">
+      <div class="section-top">
+        <div>
+          <span class="section-kicker">THE COLLECTION</span>
+          <h2 id="libraryHeading">Explore the Books</h2>
+          <p id="bookCount" class="book-count">Loading books…</p>
+        </div>
+        <label class="search-box">
+          <span class="sr-only">Search books</span>
+          <span aria-hidden="true">⌕</span>
+          <input id="searchInput" type="search" placeholder="Search books…" autocomplete="off">
+        </label>
+      </div>
+
+      <div id="status" class="status" role="status" aria-live="polite">Loading the library…</div>
+      <div id="booksGrid" class="books-grid" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>© <span id="year"></span> Mogge</span>
+      <span>Mission Of Generating Global Empathy</span>
+    </div>
+  </footer>
+
+  <script src="js/app.js" defer></script>
+</body>
+</html>

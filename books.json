@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-08-26T06:36:51.670Z",
+  "books": [
+    {
+      "title": "Captain Finn And The Singing Whale",
+      "slug": "captain-finn-and-the-singing-whale",
+      "file": "books/Captain Finn And The Singing Whale.epub",
+      "format": "epub",
+      "status": "published",
+      "order": 1
+    },
+    {
+      "title": "The Boy Who Befriended Stroms",
+      "slug": "the-boy-who-befriended-stroms",
+      "file": "books/The Boy Who Befriended Stroms.epub",
+      "format": "epub",
+      "status": "published",
+      "order": 2
+    },
+    {
+      "title": "The Brave Little Fox",
+      "slug": "the-brave-little-fox",
+      "file": "books/The Brave Little Fox.epub",
+      "format": "epub",
+      "status": "published",
+      "order": 3
+    }
+  ]
+}
