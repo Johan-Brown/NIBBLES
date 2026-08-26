@@ -1,5 +1,4 @@
-# NIBBLES
-Narrative Intervention Books for Behavioural, Learning, Emotional &amp; Social Development.
+
 # NIBBLES
 
 ### Narrative Intervention for Behavioural, Learning, Emotional & Social Development
