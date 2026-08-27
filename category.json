@@ -2,6 +2,9 @@
   "type": "ebook-category",
   "title": "NIBBLES",
   "slug": "nibbles",
+  "badge": "INTERVENTION",
+  "icon": "🧠",
+  "logo": "",
   "description": "Narrative Intervention Books for Behavioural, Learning, Emotional & Social Development.",
   "status": "published",
   "order": 1
