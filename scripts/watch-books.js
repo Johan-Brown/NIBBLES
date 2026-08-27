@@ -6,6 +6,8 @@ const root = path.resolve(__dirname, '..');
 const booksDir = path.join(root, 'books');
 const syncScript = path.join(__dirname, 'sync-books.js');
 
+const ALLOWED_EXTENSIONS = ['.epub', '.pdf', '.mobi', '.azw3'];
+
 let timer;
 function sync() {
   clearTimeout(timer);
@@ -13,15 +15,19 @@ function sync() {
     execFile(process.execPath, [syncScript], (error, stdout, stderr) => {
       if (error) console.error(error.message);
       if (stdout) process.stdout.write(stdout);
-      if (stderr) process.stderr.write(stderr);
+      if (stderr) process.stdout.write(stderr);
     });
   }, 300);
 }
 
-console.log(`Watching ${booksDir} for EPUB changes...`);
+if (!fs.existsSync(booksDir)) {
+  fs.mkdirSync(booksDir, { recursive: true });
+}
+
+console.log(`Watching ${booksDir} for book changes (EPUB/PDF)...`);
 sync();
 fs.watch(booksDir, { persistent: true }, (eventType, filename) => {
-  if (filename && path.extname(filename).toLowerCase() === '.epub') {
+  if (filename && ALLOWED_EXTENSIONS.includes(path.extname(filename).toLowerCase())) {
     console.log(`${eventType}: ${filename}`);
     sync();
   }
