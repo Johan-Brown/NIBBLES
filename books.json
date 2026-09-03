@@ -1,21 +1,50 @@
 {
-  "generatedAt": "2026-08-27T07:17:57.651Z",
+  "generatedAt": "2026-09-03T06:52:53.012Z",
   "books": [
     {
       "title": "Captain Finn And The Singing Whale",
       "slug": "captain-finn-and-the-singing-whale",
       "file": "books/Captain Finn And The Singing Whale.epub",
-      "format": "epub",
+      "format": "EPUB",
       "status": "published",
-      "order": 1
+      "order": 1,
+      "cover": "covers/captain-finn-and-the-singing-whale.png"
+    },
+    {
+      "title": "kiaans listening game",
+      "slug": "kiaans-listening-game",
+      "file": "books/kiaans_listening_game.epub",
+      "format": "EPUB",
+      "status": "published",
+      "order": 2,
+      "cover": "covers/kiaans-listening-game.jpg"
+    },
+    {
+      "title": "pip drinks bettermilk",
+      "slug": "pip-drinks-bettermilk",
+      "file": "books/pip_drinks_bettermilk.epub",
+      "format": "EPUB",
+      "status": "published",
+      "order": 3,
+      "cover": "covers/pip-drinks-bettermilk.jpg"
+    },
+    {
+      "title": "pranav and the magic room",
+      "slug": "pranav-and-the-magic-room",
+      "file": "books/pranav_and_the_magic_room.epub",
+      "format": "EPUB",
+      "status": "published",
+      "order": 4,
+      "cover": "covers/pranav-and-the-magic-room.jpg"
     },
     {
       "title": "The Boy Who Befriended Stroms",
       "slug": "the-boy-who-befriended-stroms",
       "file": "books/The Boy Who Befriended Stroms.epub",
-      "format": "epub",
+      "format": "EPUB",
       "status": "published",
-      "order": 2
+      "order": 5,
+      "cover": "covers/the-boy-who-befriended-stroms.png"
     }
   ]
 }
